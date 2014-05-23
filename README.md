@@ -1,6 +1,4 @@
 # AutoLog
-=======
-
 ### Features:
 * Logs Keyboards with EN-Layout
 * Case-Sensitive-Logging
