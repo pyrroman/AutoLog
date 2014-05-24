@@ -1,3 +1,4 @@
+#NoTrayIcon
 #Include-Once
 #include <FileConstants.au3>
 #Include <misc.au3>
