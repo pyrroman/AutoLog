@@ -15,4 +15,5 @@ A simple yet powerful Keylogger written in AutoIt. The compiled version of Run.a
 
 ## Tested under:
 * Windows 7
+* Windows Vista
 * WINE (Windows 8 Mode)
