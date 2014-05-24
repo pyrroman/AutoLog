@@ -1,4 +1,7 @@
 # AutoLog
+
+A simple yet powerful Keylogger written in AutoIt. The compiled version of Run.au3 is only detected by 3 Scanners on virustotal.com (Fortinet, Jiangmin & Zillya).
+
 ## Features:
 * Logs Keyboards with EN-Layout
 * Case-Sensitive-Logging
