@@ -12,6 +12,7 @@ A simple yet powerful Keylogger written in AutoIt. The compiled version of Run.a
 
 ## Bugs:
 * Under WINE the headline of the log is missing
+* Doesn't delete the temporary file on program-exit
 
 ## Tested under:
 * Windows 7
