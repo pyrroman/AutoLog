@@ -1,6 +1,7 @@
 
 <?php
 
+//http://stackoverflow.com/questions/15699101/get-the-client-ip-address-using-php
 function get_client_ip() {
     $ipaddress = '';
     if (getenv('HTTP_CLIENT_IP'))
