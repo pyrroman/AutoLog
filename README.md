@@ -11,8 +11,10 @@ A simple yet powerful Keylogger written in AutoIt. The compiled version of Run.a
 * The server can generate HTML-files for every logged client
 
 ## Bugs:
-* Under WINE the headline of the log is missing
 * Doesn't delete the temporary file on program-exit
+
+## Todo:
+* Let the Keylogger do a cleanup of the temporary file at program-exit
 
 ## Tested under:
 * Windows 7
