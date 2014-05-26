@@ -18,14 +18,15 @@ function get_client_ip() {
     return $ipaddress;
 }
 
+$ip = get_client_ip();
+$content = $_GET["content"];
+
 if(file_exists($ip))
 {
-	$pos = strrpos($content, "</head>");
-	$content = substr($content, $pos+7, strlen($content) - $pos);
+	$pos = strrpos($content, "<body>");
+	$content = substr($content, $pos+6, strlen($content) - $pos);
 }
 
-$content = $_GET["content"];
-$ip = get_client_ip();
 $file = fopen($ip,"a+");
 fwrite($file, $content);
 fclose($file);
